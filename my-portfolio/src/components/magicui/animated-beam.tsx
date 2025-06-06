@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import React, { forwardRef, useRef } from "react";
+import React, { useRef } from "react";
 import { motion } from "motion/react";
 
 export interface AnimatedBeamProps {
@@ -85,7 +85,7 @@ export const AnimatedBeam: React.FC<AnimatedBeamProps> = ({
     }
 
     return () => resizeObserver.disconnect();
-  }, [updatePath]);
+  }, [updatePath, containerRef]);
 
   return (
     <svg

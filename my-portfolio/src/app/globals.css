@@ -206,6 +206,15 @@
   }
 }
 
+@keyframes ripple {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+}
+
 .animate-shiny-text {
   animation: shiny-text 8s ease-in-out infinite;
 }
@@ -240,6 +249,10 @@
 
 .animate-number-ticker {
   animation: number-ticker 0.3s ease-out;
+}
+
+.animate-ripple {
+  animation: ripple 3s ease-in-out infinite;
 }
 
 @layer base {

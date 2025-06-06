@@ -1,19 +1,9 @@
 "use client";
 
-import React, { CSSProperties, ReactElement, useEffect, useState } from "react";
 import { motion } from "motion/react";
+import { CSSProperties, ReactElement, useEffect, useState } from "react";
 
 import { cn } from "@/lib/utils";
-
-interface SparklesTextProps {
-  text: string;
-  colors?: {
-    first: string;
-    second: string;
-  };
-  className?: string;
-  sparklesCount?: number;
-}
 
 interface Sparkle {
   id: string;
@@ -25,134 +15,136 @@ interface Sparkle {
   lifespan: number;
 }
 
-export default function SparklesText({
-  text,
+const Sparkle: React.FC<Sparkle> = ({ id, x, y, color, delay, scale }) => {
+  return (
+    <motion.svg
+      key={id}
+      className="pointer-events-none absolute z-20"
+      initial={{ opacity: 0, left: x, top: y }}
+      animate={{
+        opacity: [0, 1, 0],
+        scale: [0, scale, 0],
+        rotate: [75, 120, 150],
+      }}
+      transition={{ duration: 0.8, repeat: Infinity, delay }}
+      width="21"
+      height="21"
+      viewBox="0 0 21 21"
+    >
+      <path
+        d="M9.82531 0.843845C10.0553 0.215178 10.9446 0.215178 11.1746 0.843845L11.8618 2.72026C12.4006 4.19229 12.3916 6.39157 13.5 7.5C14.6084 8.60843 16.8077 8.59935 18.2797 9.13822L20.1561 9.82534C20.7858 10.0553 20.7858 10.9447 20.1561 11.1747L18.2797 11.8618C16.8077 12.4007 14.6084 12.3916 13.5 13.5C12.3916 14.6084 12.4006 16.8077 11.8618 18.2798L11.1746 20.1562C10.9446 20.7858 10.0553 20.7858 9.82531 20.1562L9.13819 18.2798C8.59932 16.8077 8.60843 14.6084 7.5 13.5C6.39157 12.3916 4.19225 12.4007 2.72023 11.8618L0.843814 11.1747C0.215148 10.9447 0.215148 10.0553 0.843814 9.82534L2.72023 9.13822C4.19225 8.59935 6.39157 8.60843 7.5 7.5C8.60843 6.39157 8.59932 4.19229 9.13819 2.72026L9.82531 0.843845Z"
+        fill={color}
+      />
+    </motion.svg>
+  );
+};
+
+interface SparklesTextProps {
+  /**
+   * @default <div />
+   * @type ReactElement
+   * @description
+   * The component to be rendered as the text
+   * */
+  as?: ReactElement;
+
+  /**
+   * @default ""
+   * @type string
+   * @description
+   * The className of the text
+   */
+  className?: string;
+
+  /**
+   * @required
+   * @type ReactNode
+   * @description
+   * The content to be displayed
+   * */
+  children: React.ReactNode;
+
+  /**
+   * @default 10
+   * @type number
+   * @description
+   * The count of sparkles
+   * */
+  sparklesCount?: number;
+
+  /**
+   * @default "{first: '#9E7AFF', second: '#FE8BBB'}"
+   * @type string
+   * @description
+   * The colors of the sparkles
+   * */
+  colors?: {
+    first: string;
+    second: string;
+  };
+}
+
+export const SparklesText: React.FC<SparklesTextProps> = ({
+  children,
   colors = { first: "#9E7AFF", second: "#FE8BBB" },
   className,
   sparklesCount = 10,
-}: SparklesTextProps) {
+  ...props
+}) => {
   const [sparkles, setSparkles] = useState<Sparkle[]>([]);
 
   useEffect(() => {
-    const generateSpark = (): Sparkle => ({
-      id: `sparkle-${Date.now()}-${Math.random()}`,
-      x: `${Math.random() * 100}%`,
-      y: `${Math.random() * 100}%`,
-      color: Math.random() > 0.5 ? colors.first : colors.second,
-      delay: Math.random() * 2,
-      scale: Math.random() * 1 + 0.3,
-      lifespan: Math.random() * 10 + 5,
-    });
-
-    const initializeSparks = () => {
-      const newSparks = Array.from({ length: sparklesCount }, generateSpark);
-      setSparkles(newSparks);
+    const generateStar = (): Sparkle => {
+      const starX = `${Math.random() * 100}%`;
+      const starY = `${Math.random() * 100}%`;
+      const color = Math.random() > 0.5 ? colors.first : colors.second;
+      const delay = Math.random() * 2;
+      const scale = Math.random() * 1 + 0.3;
+      const lifespan = Math.random() * 10 + 5;
+      const id = `${starX}-${starY}-${Date.now()}`;
+      return { id, x: starX, y: starY, color, delay, scale, lifespan };
     };
 
-    const updateSparks = () => {
-      setSparkles((currentSparks) =>
-        currentSparks.map((spark) => ({
-          ...spark,
-          id: `sparkle-${Date.now()}-${Math.random()}`,
-          x: `${Math.random() * 100}%`,
-          y: `${Math.random() * 100}%`,
-        }))
+    const initializeStars = () => {
+      const newSparkles = Array.from({ length: sparklesCount }, generateStar);
+      setSparkles(newSparkles);
+    };
+
+    const updateStars = () => {
+      setSparkles((currentSparkles) =>
+        currentSparkles.map((star) => {
+          if (star.lifespan <= 0) {
+            return generateStar();
+          } else {
+            return { ...star, lifespan: star.lifespan - 0.1 };
+          }
+        }),
       );
     };
 
-    initializeSparks();
-    const interval = setInterval(updateSparks, 3000);
+    initializeStars();
+    const interval = setInterval(updateStars, 100);
 
     return () => clearInterval(interval);
   }, [colors.first, colors.second, sparklesCount]);
 
   return (
     <div
-      className={cn(
-        "relative inline-block",
-        className
-      )}
+      className={cn("text-6xl font-bold", className)}
+      {...props}
+      style={
+        {
+          "--sparkles-first-color": `${colors.first}`,
+          "--sparkles-second-color": `${colors.second}`,
+        } as CSSProperties
+      }
     >
-      <span className="relative z-10">{text}</span>
-      <span className="absolute inset-0">
+      <span className="relative inline-block">
         {sparkles.map((sparkle) => (
           <Sparkle key={sparkle.id} {...sparkle} />
         ))}
+        <strong>{children}</strong>
       </span>
     </div>
-  );
-}
-
-interface SparkleProps {
-  id: string;
-  x: string;
-  y: string;
-  color: string;
-  delay: number;
-  scale: number;
-  lifespan: number;
-}
-
-const Sparkle: React.FC<SparkleProps> = ({
-  id,
-  x,
-  y,
-  color,
-  delay,
-  scale,
-}) => {
-  return (
-    <motion.svg
-      key={id}
-      className="pointer-events-none absolute z-20"
-      initial={{ opacity: 0, transform: `translate(-50%, -50%) scale(0)` }}
-      animate={{
-        opacity: [0, 1, 0],
-        transform: [
-          `translate(-50%, -50%) scale(0) rotate(0deg)`,
-          `translate(-50%, -50%) scale(${scale}) rotate(180deg)`,
-          `translate(-50%, -50%) scale(0) rotate(360deg)`,
-        ],
-      }}
-      transition={{
-        duration: 3,
-        repeat: Infinity,
-        delay,
-      }}
-      style={{
-        left: x,
-        top: y,
-      }}
-      width="22"
-      height="22"
-      viewBox="0 0 22 22"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M11.0001 3.00009C11.0001 1.34323 9.65695 0.00009155 8.00009 0.00009155C9.65695 0.00009155 11.0001 -1.34305 11.0001 -3.00009C11.0001 -1.34305 12.3432 0.00009155 14.0001 0.00009155C12.3432 0.00009155 11.0001 1.34323 11.0001 3.00009Z"
-        fill={color}
-      />
-      <path
-        d="M11.0001 8.99991C11.0001 7.34305 9.65695 5.99991 8.00009 5.99991C9.65695 5.99991 11.0001 4.65677 11.0001 2.99991C11.0001 4.65677 12.3432 5.99991 14.0001 5.99991C12.3432 5.99991 11.0001 7.34305 11.0001 8.99991Z"
-        fill={color}
-      />
-      <path
-        d="M8.00009 11.0001C8.00009 9.34323 6.65695 8.00009 5.00009 8.00009C6.65695 8.00009 8.00009 6.65695 8.00009 5.00009C8.00009 6.65695 9.34323 8.00009 11.0001 8.00009C9.34323 8.00009 8.00009 9.34323 8.00009 11.0001Z"
-        fill={color}
-      />
-      <path
-        d="M8.00009 17.0001C8.00009 15.3432 6.65695 14.0001 5.00009 14.0001C6.65695 14.0001 8.00009 12.6569 8.00009 11.0001C8.00009 12.6569 9.34323 14.0001 11.0001 14.0001C9.34323 14.0001 8.00009 15.3432 8.00009 17.0001Z"
-        fill={color}
-      />
-      <path
-        d="M14.0001 14.0001C14.0001 12.3432 12.6569 11.0001 11.0001 11.0001C12.6569 11.0001 14.0001 9.65695 14.0001 8.00009C14.0001 9.65695 15.3432 11.0001 17.0001 11.0001C15.3432 11.0001 14.0001 12.3432 14.0001 14.0001Z"
-        fill={color}
-      />
-      <path
-        d="M14.0001 20.0001C14.0001 18.3432 12.6569 17.0001 11.0001 17.0001C12.6569 17.0001 14.0001 15.6569 14.0001 14.0001C14.0001 15.6569 15.3432 17.0001 17.0001 17.0001C15.3432 17.0001 14.0001 18.3432 14.0001 20.0001Z"
-        fill={color}
-      />
-    </motion.svg>
   );
 };
