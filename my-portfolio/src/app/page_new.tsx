@@ -3,7 +3,7 @@
 import React from "react";
 import { Particles } from "@/components/magicui/particles";
 import { Terminal } from "@/components/magicui/terminal";
-// import { IconCloud } from "@/components/magicui/icon-cloud";
+import { IconCloud } from "@/components/magicui/icon-cloud";
 import { BentoGrid, BentoCard } from "@/components/magicui/bento-grid";
 import { Dock, DockIcon } from "@/components/magicui/dock";
 import { Badge } from "@/components/ui/badge";
@@ -189,16 +189,7 @@ function IconCloudDemo() {
 
   return (
     <div className="relative flex size-full max-w-lg items-center justify-center overflow-hidden rounded-lg border bg-background px-20 pb-20 pt-8">
-      <div className="grid grid-cols-6 gap-4 opacity-60">
-        {images.slice(0, 18).map((image, index) => (
-          <img
-            key={index}
-            src={image}
-            alt=""
-            className="h-8 w-8 dark:invert"
-          />
-        ))}
-      </div>
+      <IconCloud images={images} />
     </div>
   );
 }
@@ -401,7 +392,7 @@ export default function Home() {
 
       {/* Contact Dock */}
       <section className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50">
-        <Dock>
+        <Dock direction="middle">
           <DockIcon>
             <Button
               variant="ghost"
